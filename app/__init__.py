@@ -5,6 +5,9 @@ from app.database.database import db
 
 migrate = Migrate()
 
+# Le avisa a Flask que cargue el paquete de modelos que acabas de mover
+import app.models
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
