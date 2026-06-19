@@ -1,8 +1,8 @@
-"""Creacion de tablas de alquiler
+"""Migración inicial limpia
 
-Revision ID: 63bc21ae9f37
+Revision ID: 00662891ce80
 Revises: 
-Create Date: 2026-06-17 12:54:02.054424
+Create Date: 2026-06-18 19:22:39.924279
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '63bc21ae9f37'
+revision = '00662891ce80'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,8 +25,9 @@ def upgrade():
     )
     op.create_table('roles',
     sa.Column('idRol', sa.Integer(), nullable=False),
-    sa.Column('nombre', sa.String(length=30), nullable=False),
-    sa.PrimaryKeyConstraint('idRol')
+    sa.Column('nombre', sa.String(length=50), nullable=False),
+    sa.PrimaryKeyConstraint('idRol'),
+    sa.UniqueConstraint('nombre')
     )
     op.create_table('prenda',
     sa.Column('idPrenda', sa.Integer(), nullable=False),
@@ -36,8 +37,8 @@ def upgrade():
     sa.Column('talla', sa.String(length=10), nullable=False),
     sa.Column('color', sa.String(length=30), nullable=False),
     sa.Column('precio_alquiler', sa.Numeric(precision=10, scale=2), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['idCategoria'], ['categoria.idCategoria'], ),
     sa.PrimaryKeyConstraint('idPrenda')
     )
@@ -48,9 +49,10 @@ def upgrade():
     sa.Column('documento', sa.String(length=20), nullable=False),
     sa.Column('telefono', sa.String(length=20), nullable=True),
     sa.Column('correo', sa.String(length=100), nullable=False),
-    sa.Column('Contrasena', sa.String(length=255), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('contrasena', sa.String(length=255), nullable=False),
+    sa.Column('avatar', sa.String(length=255), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['idRol'], ['roles.idRol'], ),
     sa.PrimaryKeyConstraint('idUsuario'),
     sa.UniqueConstraint('correo'),
@@ -61,8 +63,8 @@ def upgrade():
     sa.Column('idPrenda', sa.Integer(), nullable=False),
     sa.Column('codigo_interno', sa.String(length=30), nullable=False),
     sa.Column('estado', sa.Enum('DISPONIBLE', 'ALQUILADO', 'MANTENIMIENTO', name='estadoinventario'), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['idPrenda'], ['prenda.idPrenda'], ),
     sa.PrimaryKeyConstraint('idInventario'),
     sa.UniqueConstraint('codigo_interno')
@@ -71,15 +73,15 @@ def upgrade():
     sa.Column('idReserva', sa.Integer(), nullable=False),
     sa.Column('id_cliente', sa.Integer(), nullable=False),
     sa.Column('id_administrador', sa.Integer(), nullable=False),
-    sa.Column('fecha_reserva', sa.Date(), nullable=False),
+    sa.Column('fecha_reserva', sa.Date(), server_default=sa.text('(CURRENT_DATE)'), nullable=False),
     sa.Column('fecha_evento', sa.Date(), nullable=False),
     sa.Column('fecha_inicio', sa.Date(), nullable=False),
     sa.Column('fecha_fin', sa.Date(), nullable=False),
     sa.Column('fecha_devolucion', sa.Date(), nullable=True),
     sa.Column('estado', sa.Enum('PENDIENTE', 'ENTREGADO', 'DEVUELTO', 'CANCELADO', name='estadoreserva'), nullable=False),
     sa.Column('observaciones', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['id_administrador'], ['usuarios.idUsuario'], ),
     sa.ForeignKeyConstraint(['id_cliente'], ['usuarios.idUsuario'], ),
     sa.PrimaryKeyConstraint('idReserva')
@@ -92,8 +94,8 @@ def upgrade():
     sa.Column('fecha_cita', sa.DateTime(), nullable=False),
     sa.Column('motivo', sa.String(length=150), nullable=True),
     sa.Column('estado', sa.String(length=30), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['id_administrador'], ['usuarios.idUsuario'], ),
     sa.ForeignKeyConstraint(['id_cliente'], ['usuarios.idUsuario'], ),
     sa.ForeignKeyConstraint(['id_reserva'], ['reserva.idReserva'], ),
@@ -107,8 +109,8 @@ def upgrade():
     sa.Column('monto_total', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('estado', sa.String(length=30), nullable=False),
     sa.Column('descripcion', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['idReserva'], ['reserva.idReserva'], ),
     sa.PrimaryKeyConstraint('idComprobante'),
     sa.UniqueConstraint('numero_comprobante')
